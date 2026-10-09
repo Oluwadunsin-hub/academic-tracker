@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Academic Progress Tracker</title>
+<meta name="description" content="Track semester results, CGPA, class of degree, goals and what-if plans. Works offline and syncs across devices.">
+<meta name="theme-color" content="#4f46e5"><meta property="og:title" content="Academic Progress Tracker"><meta property="og:description" content="CGPA calculator, goal planner and transcript for university students."><meta property="og:image" content="/icon-512.png">
+<link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="/config.js"></script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f6fb;--card:#fff;--tx:#18202f;--mu:#6a7488;--ac:#4f46e5;--ac2:#e0e7ff;--ok:#16a34a;--bad:#dc2626;--wn:#d97706;--bd:#e3e8f2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1320;--card:#171e30;--tx:#e8ecf6;--mu:#97a1b8;--ac:#818cf8;--ac2:#27306b;--bd:#262f47}}
+:root[data-theme="dark"]{--bg:#0e1320;--card:#171e30;--tx:#e8ecf6;--mu:#97a1b8;--ac:#818cf8;--ac2:#27306b;--bd:#262f47}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.w{max-width:860px;margin:0 auto;padding:14px}
+.hd{display:flex;gap:12px;align-items:center;margin:6px 0 14px}
+.av{width:48px;height:48px;border-radius:14px;background:var(--ac);color:#fff;display:grid;place-items:center;font-weight:700;font-size:18px;flex:none}
+.hd h1{font-size:18px;margin:0}.hd p{margin:0;color:var(--mu);font-size:13px}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px}
+.tabs button{flex:1;white-space:nowrap;padding:9px 12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:600px){.grid.g4{grid-template-columns:repeat(4,1fr)}.grid.g3{grid-template-columns:repeat(3,1fr)}}
+.st{background:var(--bg);border-radius:12px;padding:12px}
+.st b{display:block;font-size:24px}.st span{color:var(--mu);font-size:12px}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;background:var(--ac2);color:var(--ac);font-weight:700;font-size:13px}
+.bars{display:flex;align-items:flex-end;gap:8px;height:150px;padding-top:8px;overflow-x:auto}
+.bar{flex:1;min-width:44px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:11px;color:var(--mu);text-align:center}
+.bar i{display:block;width:100%;max-width:46px;background:var(--ac);border-radius:6px 6px 0 0;min-height:3px}
+.bar.best i{background:var(--ok)}.bar.worst i{background:var(--bad)}
+.bar em{font-style:normal;color:var(--tx);font-weight:700;font-size:12px}
+ul.in{list-style:none;padding:0;margin:0}ul.in li{padding:9px 0;border-bottom:1px solid var(--bd)}ul.in li:last-child{border:0}
+.g{color:var(--ok);font-weight:700}.r{color:var(--bad);font-weight:700}.o{color:var(--wn);font-weight:700}.mu{color:var(--mu)}
+input,select{width:100%;padding:9px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx);font:inherit}
+label{display:block;font-size:12px;color:var(--mu);margin-bottom:3px}
+.f{display:grid;grid-template-columns:1fr;gap:10px}@media(min-width:600px){.f{grid-template-columns:1fr 1fr}}
+.btn{padding:9px 14px;border:0;border-radius:10px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer;font:inherit;font-weight:600}
+.btn.s{background:var(--ac2);color:var(--ac)}.btn.d{background:transparent;color:var(--bad);padding:6px 8px}
+.sh{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sh input{font-weight:700;border:0;background:transparent;padding:4px 0}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:580px}
+th{font-size:11px;text-align:left;color:var(--mu);padding:4px}td{padding:4px}
+td input{padding:7px}
+.add{display:grid;grid-template-columns:90px 1fr 104px 60px 70px 78px auto;gap:6px;margin-top:8px;min-width:680px}
+.bg{height:10px;border-radius:9px;background:var(--bg);overflow:hidden}.bg i{display:block;height:100%;background:var(--ac)}
+.stt{position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));background:var(--card);border:1px solid var(--bd);border-radius:99px;padding:4px 10px;font-size:11px;color:var(--mu)}
+.em{text-align:center;padding:20px;color:var(--mu)}
+.tb{display:flex;gap:6px;flex-wrap:wrap}.bdg{padding:8px 10px;border-radius:10px;background:var(--bg);font-size:13px;flex:1 1 150px}.bdg.off{opacity:.4}
+.ban{background:var(--ac2);color:var(--ac);padding:9px 12px;border-radius:10px;margin-bottom:12px;font-size:13px;font-weight:600}
+.av img{width:100%;height:100%;border-radius:14px;object-fit:cover}
+@media print{.tabs,.hd,.stt,.noprint,.ban{display:none!important}body{background:#fff;color:#000}.card{border:0}}
+</style></head><body><div class="w" id="app"></div><div class="stt" id="stt">Loading</div>
+<script>
+const KEY='acad-tracker-v1';
+let CL;const CL5=[[4.5,'First Class'],[3.5,'Second Class Upper (2:1)'],[2.4,'Second Class Lower (2:2)'],[1.5,'Third Class'],[1,'Pass']];
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S={p:{name:'',matric:'',school:'',faculty:'',dept:'',level:'100',entry:'',grad:'',years:'4',units:'150'},sem:[],target:4.5,scale:5,plan:[],study:{},rem:'',theme:'',photo:'',upd:0};
+let tab='ov',timer,sb=null,user=null;
+const M=()=>+S.scale;const norm=()=>{S=Object.assign({scale:5,plan:[],study:{},rem:'',theme:'',photo:'',upd:0},S)};const th=()=>{document.documentElement.dataset.theme=S.theme||''};
+const gp=s=>M()==5?(s>=70?5:s>=60?4:s>=50?3:s>=45?2:s>=40?1:0):(s>=70?4:s>=60?3:s>=50?2:s>=40?1:0);
+let LAST={};const key=c=>(c.code||'').trim().toLowerCase();
+function idx(){LAST={};S.sem.forEach(m=>m.courses.forEach(c=>{if(has(c)&&key(c))LAST[key(c)]=c.id}));CL=CL5.map(c=>[+(c[0]*M()/5).toFixed(2),c[1]])}
+const live=c=>has(c)&&(!key(c)||LAST[key(c)]==c.id);
+const CATS=['Core','Elective','GST','Departmental'];
+const gl=s=>'ABCDEF'[[70,60,50,45,40,0].findIndex(x=>s>=x)];
+const hs=c=>c.score!==''&&c.score!=null&&!isNaN(+c.score);const LP={A:75,B:65,C:55,D:47,E:42,F:20};const has=c=>hs(c)||!!c.g;const sc=c=>hs(c)?+c.score:LP[c.g];const shw=c=>hs(c)?c.score:(c.g||'-');
+function ss(m){let u=0,q=0;m.courses.forEach(c=>{if(live(c)){u+=+c.unit;q+=+c.unit*gp(sc(c))}});return{u,q,g:u?q/u:null}}
+function tot(){let u=0,q=0,n=0;S.sem.forEach(m=>{const s=ss(m);u+=s.u;q+=s.q;if(s.u)n++});return{u,q,n,g:u?q/u:null}}
+const cls=g=>g==null?'No results yet':(CL.find(c=>g>=c[0]-1e-9)||[0,'Below Pass'])[1];
+const f2=x=>x==null?'-':x.toFixed(2);
+function weakC(m){const l=m.courses.filter(live);if(!l.length)return null;return l.reduce((a,b)=>(sc(b)<sc(a)||(sc(b)==sc(a)&&gp(sc(b))==gp(sc(a))&&+b.unit>+a.unit))?b:a)}
+function save(){S.upd=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+ clearTimeout(timer);st('Saving');timer=setTimeout(async()=>{try{if(user){await push()}else st('Saved on this device')}catch(e){st('Saved on this device')}},500)}
+function st(t){document.getElementById('stt').textContent=t}
+function view(){idx();th();const t=tot(),p=S.p;
+ const ini=(p.name||'?').split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+ let h=`<div class="hd"><div class="av">${S.photo?`<img src="${S.photo}">`:esc(ini)}</div><div><h1>${esc(p.name||'Your name')}</h1><p>${esc(p.dept)} · ${esc(p.level)}L · ${esc(p.school)}</p></div><button class="btn s noprint" data-act="theme" style="margin-left:auto">&#9680;</button></div>${banner()}
+ <div class="tabs">${[['ov','Overview'],['rs','Results'],['pl','Plan'],['gl','Goal'],['tx','Transcript'],['pf','Profile']].map(x=>`<button data-act="tab" data-v="${x[0]}" class="${tab==x[0]?'on':''}">${x[1]}</button>`).join('')}</div>`;
+ if(tab=='ov')h+=ov(t);else if(tab=='rs')h+=rs();else if(tab=='pl')h+=pl(t);else if(tab=='gl')h+=gl_(t);else if(tab=='tx')h+=tx(t);else h+=pf();
+ document.getElementById('app').innerHTML=h}
+function ov(t){
+ const done=S.sem.filter(m=>ss(m).u);
+ if(!done.length)return`<div class="card em"><b>Welcome${S.p.name?', '+esc(S.p.name.split(' ')[1]||S.p.name.split(' ')[0]):''}!</b><br>Add your first semester in the Results tab and your CGPA, class and insights show up here.<br><br><button class="btn s" data-act="tab" data-v="rs">Add manually</button></div>`;
+ const gs=done.map(m=>ss(m).g),mx=Math.max(...gs),mn=Math.min(...gs);
+ const best=done.find(m=>ss(m).g==mx),worst=done.find(m=>ss(m).g==mn);
+ let all=[];done.forEach(m=>m.courses.filter(live).forEach(c=>all.push({c,m})));
+ const wc=all.reduce((a,b)=>sc(b.c)<sc(a.c)?b:a),bc=all.reduce((a,b)=>sc(b.c)>sc(a.c)?b:a);
+ const trend=done.length>1?(gs[gs.length-1]-gs[gs.length-2]):null;
+ let h=`<div class="grid g4"><div class="st"><b>${f2(t.g)}</b><span>CGPA (out of ${M().toFixed(2)})</span></div><div class="st"><b style="font-size:15px;padding:5px 0">${cls(t.g)}</b><span>Current class</span></div><div class="st"><b>${t.u}</b><span>Units graded, avg ${avgPct()}%</span></div><div class="st"><b>${done.length}</b><span>Semesters done</span></div></div>
+ <div class="card" style="margin-top:12px"><h2>GPA by semester</h2><div class="bars">${done.map(m=>{const g=ss(m).g;return`<div class="bar ${m==best&&done.length>1?'best':''} ${m==worst&&done.length>1&&mx!=mn?'worst':''}"><em>${f2(g)}</em><i style="height:${g/M()*100}%"></i>${esc(short(m.name))}</div>`}).join('')}</div>
+ <p class="mu" style="font-size:12px;margin:8px 0 0">Green is your best semester, red is your weakest.</p></div>
+ <div class="card"><h2>Insights</h2><ul class="in">
+ <li>Best semester: <span class="g">${esc(best.name)}</span> (GPA ${f2(mx)})</li>
+ <li>Weakest semester: <span class="r">${mx==mn?'None, all equal':esc(worst.name)}</span> ${mx==mn?'':`(GPA ${f2(mn)})`}</li>
+ ${trend!=null?`<li>Last semester vs the one before: <span class="${trend>=0?'g':'r'}">${trend>=0?'+':''}${trend.toFixed(2)}</span> ${trend>=0?'(improving)':'(dropped)'}</li>`:''}
+ <li>Strongest course: <span class="g">${esc(bc.c.code||bc.c.title)}</span> ${shw(bc.c)} (${esc(bc.m.name)})</li>
+ <li>Weakest course overall: <span class="r">${esc(wc.c.code||wc.c.title)}</span> ${shw(wc.c)} (${esc(wc.m.name)})</li>
+ <li><b>Weakest course per semester</b><br>${done.map(m=>{const w=weakC(m);return`<span class="mu">${esc(m.name)}:</span> ${esc(w.code||w.title)} <span class="o">${hs(w)?w.score+' ':''}(${gl(sc(w))})</span>`}).join('<br>')}</li></ul></div>`;
+ return h+gaol(t)+trend_(done,t)+cats()+badges(done,t)+coach()}
+function avgPct(){let u=0,x=0;S.sem.forEach(m=>m.courses.forEach(c=>{if(live(c)&&hs(c)){u+=+c.unit;x+=+c.unit*sc(c)}}));return u?(x/u).toFixed(1):'-'}
+function banner(){const d=S.rem&&Math.ceil((new Date(S.rem)-Date.now())/864e5);
+ if(S.rem&&d<=7)return`<div class="ban">${d<0?'Results were expected '+(-d)+' days ago.':'Results expected in '+d+' days.'} Remember to update them.</div>`;
+ if(S.sem.length&&S.upd&&Date.now()-S.upd>60*864e5)return'<div class="ban">You have not updated your results in 60 days.</div>';return''}
+function trend_(done,t){const M_=M(),TU=+S.p.units||150,rem=Math.max(TU-t.u,0);let u=0,q=0;const c=done.map(m=>{const s=ss(m);u+=s.u;q+=s.q;return q/u});
+ const rec=done.slice(-3).map(m=>ss(m).g),av=rec.reduce((a,b)=>a+b,0)/rec.length,pr=(t.q+av*rem)/TU,n=c.length+1,X=i=>20+i*(300/Math.max(n-1,1)),Y=v=>110-v/M_*100;
+ return`<div class="card"><h2>CGPA trend and prediction</h2><svg viewBox="0 0 340 120" style="width:100%"><polyline fill="none" stroke="var(--ac)" stroke-width="2.5" points="${c.map((v,i)=>X(i)+','+Y(v)).join(' ')}"/>${c.map((v,i)=>`<circle cx="${X(i)}" cy="${Y(v)}" r="3.5" fill="var(--ac)"/>`).join('')}<line x1="${X(c.length-1)}" y1="${Y(c[c.length-1])}" x2="${X(c.length)}" y2="${Y(pr)}" stroke="var(--wn)" stroke-width="2" stroke-dasharray="4"/><circle cx="${X(c.length)}" cy="${Y(pr)}" r="4" fill="var(--wn)"/></svg><p style="margin:4px 0 0">At your recent average (${f2(av)}), you finish near <b>${f2(pr)}</b> (${cls(pr)}).</p></div>`}
+function cats(){const o={};S.sem.forEach(m=>m.courses.forEach(c=>{if(live(c)){const k=c.cat||'Core';o[k]=o[k]||{u:0,q:0};o[k].u+=+c.unit;o[k].q+=+c.unit*gp(sc(c))}}));
+ const k=Object.keys(o);if(k.length<2)return'';const w=k.reduce((a,b)=>o[b].q/o[b].u<o[a].q/o[a].u?b:a);
+ return`<div class="card"><h2>Performance by course type</h2>${k.map(x=>`<div style="margin:6px 0"><div class="sh" style="margin:0"><span>${x} <span class="mu">(${o[x].u} units)</span></span><b>${f2(o[x].q/o[x].u)}</b></div><div class="bg"><i style="width:${o[x].q/o[x].u/M()*100}%"></i></div></div>`).join('')}<p class="mu" style="margin:6px 0 0;font-size:13px">Weakest area: <span class="r">${w}</span></p></div>`}
+function badges(done,t){const gs=done.map(m=>ss(m).g),hi=.8*M();let a=0,f=0;S.sem.forEach(m=>m.courses.forEach(c=>{if(live(c)){if(sc(c)>=70)a++;if(sc(c)<40)f++}}));
+ const B=[['&#128640;','First semester logged',done.length>=1],['&#128293;','3 semesters at '+hi.toFixed(1)+'+',gs.filter(g=>g>=hi).length>=3],['&#128200;','GPA rose 2 semesters in a row',gs.length>2&&gs.slice(-3).every((g,i,r)=>!i||g>r[i-1])],['&#127344;','10 A grades',a>=10],['&#128737;','No F grades in 3+ semesters',f==0&&done.length>=3],['&#127919;','On track for your goal',t.g>=+S.target]];
+ return`<div class="card"><h2>Achievements</h2><div class="tb">${B.map(b=>`<div class="bdg ${b[2]?'':'off'}">${b[0]} ${b[1]}</div>`).join('')}</div></div>`}
+function coach(){return'<div class="card noprint"><h2>Ask Claude for study advice</h2><button class="btn" data-act="coach">Analyze my results</button><div id="coach" style="margin-top:10px;white-space:pre-wrap"></div></div>'}
+function pl(t){const TU=+S.p.units||150,rem=Math.max(TU-t.u,0),m=M();let u=0,q=0;
+ S.plan.forEach(c=>{if(c.exp!==''&&!isNaN(+c.exp)){u+=+c.unit;q+=+c.unit*gp(+c.exp)}});const pg=u?(t.q+q)/(t.u+u):t.g;
+ const co=[],ws=[];S.sem.forEach(s=>s.courses.forEach(c=>{if(live(c)){ws.push(c);if(sc(c)<40)co.push({c,s})}}));ws.sort((a,b)=>a.score-b.score);
+ return`<div class="card"><h2>What-if simulator</h2><p class="mu" style="margin:0 0 8px;font-size:13px">Add upcoming courses with the score you expect.</p>
+ ${S.plan.map((c,i)=>`<div class="f" style="grid-template-columns:1fr 60px 70px auto;margin-bottom:6px"><input data-act="pc" data-i="${i}" data-k="code" value="${esc(c.code)}" placeholder="Code"><input type="number" data-act="pc" data-i="${i}" data-k="unit" value="${esc(c.unit)}"><input type="number" data-act="pc" data-i="${i}" data-k="exp" value="${esc(c.exp)}" placeholder="Score"><button class="btn d" data-act="dpc" data-i="${i}">x</button></div>`).join('')}
+ <button class="btn s" data-act="apc">+ Add course</button>${u&&t.g!=null?`<p style="margin:10px 0 0">Projected CGPA: <b>${f2(pg)}</b> (${cls(pg)}) <span class="${pg>=t.g?'g':'r'}">${pg>=t.g?'+':''}${(pg-t.g).toFixed(2)}</span></p>`:''}</div>
+ <div class="card"><h2>GPA needed for each class</h2>${t.g==null?'<p class="mu">Add results first.</p>':`<div class="tw"><table style="min-width:0"><tr><th>Goal</th><th>Avg over ${rem} units</th><th></th></tr>${CL.map(c=>{const r=rem?(c[0]*TU-t.q)/rem:null;return`<tr><td>${c[1]}</td><td><b>${r==null?'-':r<=0?'Safe':f2(r)}</b></td><td>${r!=null&&r>m?'<span class="r">Out of reach</span>':r!=null&&r>.9*m?'<span class="o">Very hard</span>':'<span class="g">Doable</span>'}</td></tr>`}).join('')}</table></div>`}</div>
+ <div class="card"><h2>Carryovers and retakes</h2>${co.length?co.map(x=>`<div style="padding:6px 0;border-bottom:1px solid var(--bd)"><span class="r">${esc(x.c.code||x.c.title)}</span> (${esc(x.s.name)}) scored ${shw(x.c)}. Passing with a C lifts your CGPA from ${f2(t.g)} to <b>${f2((t.q+ +x.c.unit*gp(50))/t.u)}</b>.</div>`).join('')+'<p class="mu" style="font-size:12px;margin:8px 0 0">To record a retake, add the same course code again with the new score. The latest attempt counts.</p>':'<p class="g" style="margin:0">No failed courses.</p>'}</div>
+ <div class="card"><h2>Study planner (weakest courses)</h2>${ws.slice(0,3).map(c=>{const h=S.study[c.id]??Math.min(12,Math.max(3,Math.round((75-sc(c))/6)+3));return`<div class="sh" style="margin:6px 0"><span>${esc(c.code||c.title)} <span class="o">${shw(c)}</span></span><span>Hours/week <input type="number" style="width:64px;display:inline-block" data-act="sd" data-id="${c.id}" value="${h}"></span></div>`}).join('')||'<p class="mu">No results yet.</p>'}<p class="mu" style="font-size:12px;margin:4px 0 0">Suggested hours grow as the score falls. Adjust to fit your timetable.</p></div>`}
+function tx(t){const p=S.p;return`<div class="card noprint"><button class="btn" data-act="print">Print / Save as PDF</button> <button class="btn s" data-act="txd">Download file</button></div><div class="card" id="tx"><div style="display:flex;gap:12px;align-items:center;border-bottom:2px solid var(--ac);padding-bottom:10px;margin-bottom:10px">${S.photo?`<img src="${S.photo}" style="width:64px;height:64px;border-radius:10px;object-fit:cover">`:''}<div><h2 style="margin:0;font-size:18px">Academic Result Summary</h2><b>${esc(p.name)}</b><br><span class="mu">${p.matric?'Matric: '+esc(p.matric)+' · ':''}${esc(p.dept)}${p.faculty?', '+esc(p.faculty):''} · ${esc(p.level)} Level<br>${esc(p.school)}</span></div></div>
+ ${S.sem.filter(m=>m.courses.length).map(m=>`<h3 style="margin:12px 0 4px;font-size:14px">${esc(m.name)} <span class="mu">GPA ${f2(ss(m).g)}</span></h3><table style="min-width:0"><tr><th>Code</th><th>Title</th><th>Unit</th><th>Score</th><th>Grade</th></tr>${m.courses.map(c=>`<tr><td>${esc(c.code)}</td><td>${esc(c.title)}</td><td>${esc(c.unit)}</td><td>${shw(c)}</td><td>${has(c)?gl(sc(c)):'-'}</td></tr>`).join('')}</table>`).join('')}
+ <p style="margin-top:14px"><b>CGPA: ${f2(t.g)} / ${M().toFixed(2)}</b> · ${cls(t.g)} · ${t.u} units</p><p class="mu" style="font-size:11px">Generated ${new Date().toLocaleDateString()}. Unofficial summary.</p></div>`}
+async function dl(n,t){try{const d=await claude.use('downloads');await d.save({filename:n,data:t})}catch(x){const l=document.createElement('a');l.href=URL.createObjectURL(new Blob([t]));l.download=n;l.click()}}
+function short(n){return n.replace('First','1st').replace('Second','2nd').replace('Semester','Sem')}
+function gaol(t,full){
+ const T=+S.target,TU=+S.p.units||150,rem=Math.max(TU-t.u,0),qpN=T*TU-t.q,req=rem?qpN/rem:null,maxG=(t.q+M()*rem)/TU;
+ const tn=(CL.find(c=>c[0]==T)||[0,'your goal'])[1];
+ let msg;
+ if(t.g==null)msg='Add results to see what you need.';
+ else if(rem==0)msg=(t.g>=T?'<span class="g">Goal reached.</span>':'<span class="r">All units are done and the goal was missed.</span>');
+ else if(req<=0)msg='<span class="g">You are already safe for this goal.</span> Even a low GPA keeps you on target.';
+ else if(req>M())msg=`<span class="r">Goal is out of reach.</span> The best you can finish with is ${f2(maxG)} (${cls(maxG)}).`;
+ else msg=`You need an average GPA of <b class="${req>.9*M()?'r':req>.76*M()?'o':'g'}">${f2(req)}</b> over your remaining ${rem} units (${rem*1} to go of ${TU}).`;
+ return`<div class="card"><h2>Goal: ${esc(tn)} (${f2(T)}+)</h2><div class="bg"><i style="width:${Math.min(100,(t.g||0)/T*100)}%"></i></div><p style="margin:8px 0 0">${msg}</p>${t.g!=null&&rem?`<p class="mu" style="margin:6px 0 0;font-size:13px">Best possible final CGPA: ${f2(maxG)} (${cls(maxG)})</p>`:''}</div>`}
+function gl_(t){
+ const rs=Math.max((+S.p.years||4)*2-S.sem.length,0);
+ return`<div class="card"><h2>Set your graduation goal</h2><div class="f"><div><label>Target class</label><select data-act="target">${CL.map(c=>`<option value="${c[0]}" ${+S.target==c[0]?'selected':''}>${c[1]} (${c[0].toFixed(2)}+)</option>`).join('')}</select></div>
+ <div><label>Total units for your degree</label><input type="number" data-act="p" data-k="units" value="${esc(S.p.units)}"></div></div></div>${gaol(t)}
+ <div class="card"><h2>Semesters left</h2><p style="margin:0">About <b>${rs}</b> semesters remaining (based on a ${esc(S.p.years)}-year programme). Expected graduation: <b>${esc(S.p.grad||'-')}</b>.</p></div>
+ <div class="card"><h2>Class boundaries (5.0 scale)</h2><ul class="in">${CL.map(c=>`<li>${c[1]}<span style="float:right" class="mu">${c[0].toFixed(2)} - ${c==CL[0]?M().toFixed(2):(CL[CL.findIndex(x=>x==c)-1][0]-0.01).toFixed(2)}</span></li>`).join('')}</ul>
+ <p class="mu" style="font-size:12px;margin:8px 0 0">Grades: A 70-100, B 60-69, C 50-59, D 45-49, E 40-44, F below 40. Points follow your chosen scale.</p></div>`}
+function rs(){
+ let h=S.sem.map((m,i)=>{const s=ss(m);return`<div class="card"><div class="sh"><input data-act="sname" data-i="${i}" value="${esc(m.name)}"><span class="pill">GPA ${f2(s.g)}</span><button class="btn d" data-act="dsem" data-i="${i}">Delete</button></div>
+ <div class="tw"><table><tr><th>Code</th><th>Title</th><th>Type</th><th>Unit</th><th>Score</th><th>Grade</th><th></th></tr>
+ ${m.courses.map((c,j)=>`<tr><td><input data-act="c" data-i="${i}" data-j="${j}" data-k="code" value="${esc(c.code)}" style="width:80px"></td><td><input data-act="c" data-i="${i}" data-j="${j}" data-k="title" value="${esc(c.title)}"></td><td><select data-act="c" data-i="${i}" data-j="${j}" data-k="cat" style="width:104px">${CATS.map(k=>`<option ${(c.cat||'Core')==k?'selected':''}>${k}</option>`).join('')}</select></td><td><input type="number" min="0" data-act="c" data-i="${i}" data-j="${j}" data-k="unit" value="${esc(c.unit)}" style="width:56px"></td><td><input type="number" min="0" max="100" data-act="c" data-i="${i}" data-j="${j}" data-k="score" value="${esc(c.score)}" style="width:66px" placeholder="--"></td><td><select data-act="c" data-i="${i}" data-j="${j}" data-k="g" style="width:64px"><option value=""></option>${'ABCDEF'.split('').map(k=>`<option ${has(c)&&gl(sc(c))==k?'selected':''}>${k}</option>`).join('')}</select>${has(c)&&!live(c)?'<small class="mu"> old</small>':''}</td><td><button class="btn d" data-act="dc" data-i="${i}" data-j="${j}">x</button></td></tr>`).join('')}</table>
+ <div class="add"><input id="a${i}c" list="cl" placeholder="Code"><input id="a${i}t" placeholder="Course title"><select id="a${i}k">${CATS.map(k=>`<option>${k}</option>`).join('')}</select><input id="a${i}u" type="number" placeholder="Unit" value="3"><input id="a${i}s" type="number" placeholder="Score"><select id="a${i}g"><option value="">Grade</option>${'ABCDEF'.split('').map(k=>`<option>${k}</option>`).join('')}</select><button class="btn s" data-act="ac" data-i="${i}">Add</button></div></div>
+ <p class="mu" style="font-size:12px;margin:8px 0 0">${s.u} units graded. Enter a score or just pick a grade. Leave both empty for outstanding courses.</p></div>`}).join('');
+ return h+`<datalist id="cl">${[...new Set(S.sem.flatMap(m=>m.courses.map(c=>c.code)).filter(Boolean))].map(c=>`<option value="${esc(c)}">`).join('')}</datalist><button class="btn" data-act="asem" style="width:100%">+ Add semester</button>`}
+function pf(){
+ const F=[['name','Full name'],['matric','Matric number'],['school','University'],['faculty','Faculty'],['dept','Department'],['entry','Year of admission'],['grad','Expected graduation year'],['years','Programme length (years)']];
+ return`<div class="card"><h2>Student profile</h2><div class="f">${F.map(x=>`<div><label>${x[1]}</label><input data-act="p" data-k="${x[0]}" value="${esc(S.p[x[0]])}"></div>`).join('')}
+ <div><label>Current level</label><select data-act="p" data-k="level">${['100','200','300','400','500'].map(l=>`<option ${S.p.level==l?'selected':''}>${l}</option>`).join('')}</select></div></div></div>
+ <div class="card"><h2>Account and sync</h2>${!sb?'<p class="mu" style="margin:0">Cloud sync is off. Results save on this device.</p>':user?`<p style="margin:0 0 8px">Signed in as <b>${esc(user.email)}</b>. Results sync across your devices.</p><button class="btn s" data-act="out">Sign out</button>`:`<label>Email</label><input type="email" id="em" placeholder="you@example.com"><button class="btn" data-act="in" style="margin-top:8px">Email me a sign-in link</button><p class="mu" style="font-size:12px;margin:6px 0 0">No password needed.</p>`}</div><div class="card"><h2>Preferences</h2><div class="f"><div><label>Grading scale</label><select data-act="scale"><option value="5" ${M()==5?'selected':''}>5.0 (Nigerian)</option><option value="4" ${M()==4?'selected':''}>4.0</option></select></div><div><label>Passport photo</label><input type="file" accept="image/*" id="ph"></div><div><label>Results expected on</label><input type="date" data-act="rem" value="${esc(S.rem)}"></div><div style="align-self:end"><button class="btn s" data-act="ics">Add reminder to calendar</button></div></div></div><div class="card"><h2>Backup</h2><p class="mu" style="margin-top:0;font-size:13px">Your data saves automatically. Download a copy now and then for safety.</p><button class="btn s" data-act="exp">Download backup</button> <label class="btn s" style="display:inline-block;margin:0;cursor:pointer">Restore backup<input type="file" accept=".json" id="imp" hidden></label></div>`}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b||b.tagName=='INPUT'||b.tagName=='SELECT')return;const a=b.dataset.act,i=+b.dataset.i,j=+b.dataset.j;
+ if(a=='tab'){tab=b.dataset.v}
+ else if(a=='theme'){const dk=S.theme?S.theme=='dark':matchMedia('(prefers-color-scheme:dark)').matches;S.theme=dk?'light':'dark';save()}
+ else if(a=='apc'){S.plan.push({id:uid(),code:'',unit:3,exp:''})}
+ else if(a=='dpc'){S.plan.splice(i,1)}
+ else if(a=='print'){try{window.print()}catch(x){alert('Use Download file instead.')}return}
+ else if(a=='txd'){dl('result-summary.html','<!doctype html><meta charset=utf-8><style>body{font-family:sans-serif;max-width:760px;margin:20px auto}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;padding:4px;text-align:left}.mu{color:#666}</style>'+document.getElementById('tx').innerHTML);return}
+ else if(a=='ics'){if(!S.rem)return alert('Pick a date first.');const d=S.rem.replace(/-/g,'');dl('results-reminder.ics',`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:${uid()}@tracker\r\nDTSTAMP:${new Date().toISOString().replace(/[-:]|\.\d+/g,'')}\r\nDTSTART;VALUE=DATE:${d}\r\nSUMMARY:Update my semester results\r\nBEGIN:VALARM\r\nTRIGGER:-P1D\r\nACTION:DISPLAY\r\nDESCRIPTION:Update results\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR`);return}
+ else if(a=='in'){const e=document.getElementById('em').value.trim();if(!e)return alert('Enter your email.');const{error}=await sb.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin}});alert(error?error.message:'Check your inbox for the sign-in link.');return}
+ else if(a=='out'){await sb.auth.signOut();user=null}
+ else if(a=='coach'){const el=document.getElementById('coach');if(!user){el.textContent='Sign in from the Profile tab to use the AI coach.';return}el.textContent='Thinking...';try{const d=S.sem.map(m=>({sem:m.name,gpa:ss(m).g,courses:m.courses.filter(live).map(c=>[c.code,c.cat,c.unit,gl(sc(c))])}));const{data:{session}}=await sb.auth.getSession();const r=await fetch('/api/coach',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.access_token},body:JSON.stringify({cgpa:tot().g,scale:M(),goal:S.target,sems:d})});const j=await r.json();el.textContent=r.ok?j.text:(j.error||'Coach unavailable.')}catch(x){el.textContent='Could not reach the coach.'}return}
+ else if(a=='asem'){const n=S.sem.length;S.sem.push({id:uid(),name:`${100*(Math.floor(n/2)+1)}L ${n%2?'Second':'First'} Semester`,courses:[]});save()}
+ else if(a=='dsem'){if(!confirm('Delete this semester and all its courses?'))return;S.sem.splice(i,1);save()}
+ else if(a=='dc'){S.sem[i].courses.splice(j,1);save()}
+ else if(a=='ac'){const g=k=>document.getElementById('a'+i+k).value.trim();if(!g('c')&&!g('t'))return alert('Enter a course code or title.');S.sem[i].courses.push({id:uid(),code:g('c'),title:g('t'),unit:g('u')||3,score:g('s'),g:g('s')?'':g('g'),cat:g('k')});save()}
+ else if(a=='exp'){dl('academic-backup.json',JSON.stringify(S,null,2));return}
+ view()});
+document.addEventListener('change',e=>{const t=e.target,a=t.dataset.act;if(t.id=='imp'){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.p||!d.sem)throw 0;S=d;norm();save();view()}catch(x){alert('That file is not a valid backup.')}};r.readAsText(t.files[0]);return}
+ if(t.id=='ph'){const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=160;const x=c.getContext('2d'),q=Math.min(im.width,im.height);x.drawImage(im,(im.width-q)/2,(im.height-q)/2,q,q,0,0,160,160);S.photo=c.toDataURL('image/jpeg',.8);save();view()};im.src=URL.createObjectURL(t.files[0]);return}
+ if(!a)return;const i=+t.dataset.i,j=+t.dataset.j;
+ if(a=='pc')S.plan[i][t.dataset.k]=t.value;else if(a=='sd')S.study[t.dataset.id]=+t.value;else if(a=='scale'){const o=M();S.scale=+t.value;S.target=+(S.target*S.scale/o).toFixed(2)}else if(a=='rem')S.rem=t.value;else if(a=='p')S.p[t.dataset.k]=t.value;else if(a=='target')S.target=+t.value;else if(a=='sname')S.sem[i].name=t.value;
+ else if(a=='c'){let v=t.value;if(t.dataset.k=='score'&&v!==''){v=Math.min(100,Math.max(0,+v))}const cc=S.sem[i].courses[j],k=t.dataset.k;cc[k]=v;if(k=='score'&&v!=='')cc.g='';if(k=='g')cc.score=''}
+ save();view()});
+document.addEventListener('input',e=>{const t=e.target,m=/^a(\d+)c$/.exec(t.id||'');if(!m)return;let k;S.sem.forEach(x=>x.courses.forEach(c=>{if(key(c)&&key(c)==t.value.trim().toLowerCase())k=c}));if(k){const g=n=>document.getElementById('a'+m[1]+n);g('t').value=k.title||'';g('u').value=k.unit;g('k').value=k.cat||'Core'}});
+(async()=>{try{const l=localStorage.getItem(KEY);if(l)S=JSON.parse(l);norm()}catch(e){}
+ view();st('Saved on this device');
+ try{const C=window.APP_CONFIG||{};if(window.supabase&&C.SUPABASE_URL&&!/YOUR-/.test(C.SUPABASE_URL)){sb=supabase.createClient(C.SUPABASE_URL,C.SUPABASE_ANON_KEY);const{data:{session}}=await sb.auth.getSession();user=session?session.user:null;sb.auth.onAuthStateChange((ev,ss)=>{const was=user;user=ss?ss.user:null;if(user&&!was)pull();else if(!user&&was)view()});if(user)await pull();view()}}catch(e){st('Offline, saved on this device')}
+ if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js')})();
+async function pull(){if(!sb||!user)return;const{data}=await sb.from('trackers').select('data').eq('user_id',user.id).maybeSingle();if(data&&data.data&&(data.data.upd||0)>(S.upd||0)){S=data.data;norm();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}view();st('Synced')}else await push()}
+async function push(){if(!sb||!user)return;const{error}=await sb.from('trackers').upsert({user_id:user.id,data:S,updated_at:new Date().toISOString()});st(error?'Sync failed, saved on device':'Synced')}
+</script></body></html>

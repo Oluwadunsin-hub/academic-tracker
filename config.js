@@ -1,0 +1,1 @@
+window.APP_CONFIG={SUPABASE_URL:'https://cwlfwnuofjmbonviashq.supabase.co',SUPABASE_ANON_KEY:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3bGZ3bnVvZmptYm9udmlhc2hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1MDYwNzMsImV4cCI6MjEwNzA4MjA3M30.2JmjP6MJbCMTX_sHObxl1aps8xfWbpanXYJx2EIZ77k'};
